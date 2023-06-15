@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using MassTransit;
+using RabbitMQ;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Producer
@@ -35,9 +36,16 @@ namespace Producer
                         x.AddSagas(entryAssembly);
                         x.AddActivities(entryAssembly);
 
-                        x.UsingInMemory((context, cfg) =>
+                        x.UsingRabbitMq(configure: (hostContext, conf) =>
                         {
-                            cfg.ConfigureEndpoints(context);
+                            conf.Host("localhost", "/", hos =>
+                            {
+                                hos.Username("guest");
+                                hos.Password("guest");
+                            }
+                            );
+
+                            conf.ConfigureEndpoints(hostContext);
                         });
                     });
 
